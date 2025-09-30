@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <title>Seguridad con Máquinas – Juegos con imágenes</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, Arial;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+    header {
+      background: #111827ee;
+      padding: 12px;
+      position: sticky;
+      top: 0;
+    }
+    h1 { margin: 0; font-size: 1.4rem; }
+    .tabs { display: flex; gap: 8px; margin-top: 8px; }
+    .tab {
+      border: none; padding: 10px 12px; border-radius: 12px;
+      background: #1f2937; color: #e5e7eb; cursor: pointer;
+    }
+    .tab[aria-selected="true"] { background: #22c55e; color: #081016; }
+    .grid { display: grid; gap: 14px; margin: 16px; }
+    .card {
+      background: #111827; border: 1px solid #333; border-radius: 16px;
+      padding: 16px; box-shadow: 0 6px 18px rgba(0,0,0,.4);
+    }
+    .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-width: 500px; }
+    .tile {
+      position: relative; aspect-ratio: 1/1;
+      border-radius: 14px; background: #0b1220; border: 1px solid #263044;
+      display: grid; place-items: center; cursor: pointer;
+      transform-style: preserve-3d; transition: transform .35s;
+    }
+    .tile.flip { transform: rotateY(180deg); }
+    .face { position: absolute; inset: 0; display: grid; place-items: center; backface-visibility: hidden; border-radius: 14px; }
+    .front { background: #0f1a30; }
+    .back { transform: rotateY(180deg); background: #1f2937; }
+    .back img { width: 60%; height: 60%; object-fit: contain; }
+    .pill { display: inline-block; padding: .2rem .5rem; border: 1px solid #444; border-radius: 999px; font-size: .8rem; }
+    .scene img { max-width: 100%; border-radius: 12px; border: 1px solid #444; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Seguridad con Máquinas – Juegos</h1>
+    <div class="tabs">
+      <button class="tab" aria-selected="true" data-target="#memoria">🃏 Memorama</button>
+      <button class="tab" aria-selected="false" data-target="#riesgos">🚧 Detecta el riesgo</button>
+    </div>
+  </header>
+
+  <main class="grid">
+    <!-- MEMORAMA -->
+    <section id="memoria" class="card" role="tabpanel">
+      <h2>🃏 Memorama de seguridad</h2>
+      <p>Empareja el ícono con su significado.</p>
+      <div class="board" id="board"></div>
+      <p><span class="pill">Movimientos: <span id="moves">0</span></span>
+         <span class="pill">Aciertos: <span id="matches">0</span>/7</span></p>
+      <button id="memReset">Reiniciar</button>
+      <p id="memMsg"></p>
+    </section>
+
+    <!-- DETECTA EL RIESGO -->
+    <section id="riesgos" class="card" role="tabpanel" hidden>
+      <h2>🚧 Detecta el riesgo</h2>
+      <p>Toca las zonas peligrosas en la imagen.</p>
+      <div class="scene">
+        <img src="imagenes/escena_demo.png" alt="Escena demo"
+             usemap="#mapa-riesgos" width="800" height="450">
+        <map name="mapa-riesgos">
+          <area shape="rect" coords="600,250,660,320" alt="Trabajador sin chaleco"
+                data-control="Usar chaleco de alta visibilidad y cruzar por paso peatonal.">
+          <area shape="rect" coords="110,330,250,360" alt="Derrame sin señalizar"
+                data-control="Delimitar, absorber y corregir la fuga.">
+          <area shape="rect" coords="680,300,760,340" alt="Cruce peatonal"
+                data-control="Cruzar solo por el paso peatonal y hacer contacto visual con el operador.">
+        </map>
+      </div>
+      <div id="controlsBox" style="margin-top:10px"></div>
+      <p><span class="pill">Aciertos: <span id="riskHits">0</span>/3</span></p>
+    </section>
+  </main>
+
+  <script>
+    // ===== Tabs =====
+    const tabs=document.querySelectorAll('.tab');
+    const panels=[...document.querySelectorAll('[role="tabpanel"]')];
+    tabs.forEach(t=>t.onclick=()=>{
+      tabs.forEach(x=>x.setAttribute('aria-selected','false'));
+      t.setAttribute('aria-selected','true');
+      const sel=t.dataset.target;
+      panels.forEach(p=>p.hidden = ('#'+p.id)!==sel);
+    });
+
+    // ===== Memorama =====
+    (function(){
+      const PAIRS = [
+        ['<img src="imagenes/casco.png" alt="Casco">','Casco de seguridad'],
+        ['<img src="imagenes/chaleco.png" alt="Chaleco">','Chaleco alta visibilidad'],
+        ['<img src="imagenes/candado.png" alt="Candado">','LOTO (bloqueo/etiquetado)'],
+        ['<img src="imagenes/gafas.png" alt="Gafas">','Protección ocular'],
+        ['<img src="imagenes/guantes.png" alt="Guantes">','Guantes de protección'],
+        ['<img src="imagenes/trafico.png" alt="Tráfico">','Zonas delimitadas / tráfico'],
+        ['<img src="imagenes/piso.png" alt="Piso irregular">','Piso irregular / señal de precaución']
+      ];
+      const board=document.getElementById('board');
+      const movesEl=document.getElementById('moves');
+      const matchesEl=document.getElementById('matches');
+      const msg=document.getElementById('memMsg');
+      let first=null, second=null, lock=false, moves=0, matches=0;
+
+      function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+      function setup(){
+        board.innerHTML=''; moves=0; matches=0;
+        movesEl.textContent='0'; matchesEl.textContent='0'; msg.textContent='';
+        const data = shuffle([...PAIRS.map(p=>({t:'img',v:p[0],k:p[1]})), ...PAIRS.map(p=>({t:'txt',v:p[1],k:p[1]}))]);
+        data.forEach(it=>{
+          const t=document.createElement('div'); t.className='tile'; t.dataset.kind=it.t; t.dataset.key=it.k;
+          t.innerHTML='<div class="face front"></div><div class="face back">'+(it.t==='img'? it.v : '<small>'+it.v+'</small>')+'</div>';
+          t.onclick=()=>flip(t); board.appendChild(t);
+        });
+      }
+      function samePair(a,b){ return a.dataset.key===b.dataset.key && a.dataset.kind!==b.dataset.kind; }
+      function flip(t){
+        if(lock||t.classList.contains('flip')) return;
+        t.classList.add('flip');
+        if(!first){ first=t; return; }
+        second=t; lock=true; moves++; movesEl.textContent=moves;
+        if(samePair(first,second)){
+          matches++; matchesEl.textContent=matches;
+          lock=false; first=null; second=null;
+          if(matches===PAIRS.length) msg.textContent='🎉 ¡Completado!';
+        } else {
+          setTimeout(()=>{first.classList.remove('flip');second.classList.remove('flip');first=null;second=null;lock=false;},650);
+        }
+      }
+      document.getElementById('memReset').onclick=setup;
+      setup();
+    })();
+
+    // ===== Detecta el riesgo =====
+    (function(){
+      const box=document.getElementById('controlsBox');
+      const hitsEl=document.getElementById('riskHits');
+      let hits=0;
+      document.querySelectorAll('map[name="mapa-riesgos"] area').forEach(a=>{
+        a.addEventListener('click',(e)=>{
+          e.preventDefault();
+          if(a.dataset.done) return;
+          a.dataset.done='1';
+          hits++; hitsEl.textContent=hits;
+          const p=document.createElement('p'); p.textContent='✔ '+a.dataset.control; box.appendChild(p);
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
