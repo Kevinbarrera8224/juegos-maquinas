@@ -74,13 +74,46 @@
       <!-- Reemplaza la imagen por una tuya si quieres -->
       <img src="imagenes/escena_demo.png" alt="Escena demo" usemap="#mapa-riesgos" width="800" height="450">
       <map name="mapa-riesgos">
-        <area shape="rect" coords="600,250,660,320" alt="Trabajador sin chaleco"
-              data-control="Usar chaleco y cruzar por paso peatonal.">
-        <area shape="rect" coords="110,330,250,360" alt="Derrame sin señalizar"
-              data-control="Delimitar y corregir la fuga.">
-        <area shape="rect" coords="680,300,760,340" alt="Cruce peatonal"
-              data-control="Cruzar solo por paso peatonal.">
-      </map>
+        <!-- Escena con mapa de riesgos -->
+<img src="imagenes/escena_demo.png.jpg" alt="Escena de seguridad" usemap="#mapa-riesgos" width="900">
+
+<map name="mapa-riesgos">
+  <!-- Aquí defines las zonas correctas o riesgos -->
+  <area shape="circle" coords="734,136,67" alt="Zona 1"
+        data-control="⚠ Riesgo">
+        
+  <area shape="circle" coords="241,208,77" alt="Zona 2"
+        data-control="⚠ Riesgo">
+        
+  <area shape="circle" coords="165,43,56" alt="Zona 3"
+        data-control="⚠ Riesgo">
+        
+  <area shape="circle" coords="549,346,89" alt="Zona 4"
+        data-control="⚠ Riesgo">
+        
+  <area shape="circle" coords="467,201,67" alt="Zona 5"
+        data-control="⚠ Riesgo">
+        
+  <area shape="circle" coords="23,249,47" alt="Zona 6"
+        data-control="⚠ Riesgo">
+        
+  <area shape="circle" coords="625,164,57" alt="Zona 7"
+        data-control="⚠ Riesgo">
+        
+  <area shape="circle" coords="829,273,59" alt="Zona 8"
+        data-control="⚠ Riesgo">
+        
+  <area shape="circle" coords="131,303,56" alt="Zona 9"
+        data-control="⚠ Riesgo">
+        
+  <area shape="circle" coords="49,73,45" alt="Zona 10"
+        data-control="⚠ Riesgo">
+        
+  <area shape="circle" coords="530,29,53" alt="Zona 11"
+        data-control="⚠ Riesgo">
+</map>
+
+      
     </div>
     <div id="controlsBox"></div>
     <p><span class="pill">Aciertos: <span id="riskHits">0</span>/3</span></p>
@@ -136,13 +169,13 @@
   /*Memorama */
   (function(){
     const PAIRS=[
-      ['<img src="imagenes/cortina.jpg" alt="cortina">','Cortina'],
-      ['<img src="imagenes/electrico" alt="electrico">','Chaleco'],
-      ['<img src="imagenes/guarda" alt="guarda">','Guarda'],
-      ['<img src="imagenes/interruptor" alt="Gafas">','Gafas'],
-      ['<img src="imagenes/llaves.png" alt="Guantes">','Guantes'],
-      ['<img src="imagenes/paro1.png" alt="Tráfico">','Tráfico'],
-      ['<img src="imagenes/piso.png" alt="Piso">','Piso irregular']
+      ['<img src="imagenes/CORTINA.jpg" alt="CORTINA">','CORTINA'],
+      ['<img src="imagenes/SECCIONADOR" alt="SECCIONADOR">','SECCIONADOR'],
+      ['<img src="imagenes/GUARDA" alt="GUARDA">','GUARDA'],
+      ['<img src="imagenes/INTERLOCK" alt="INTERLOCK">','INTERLOCK'],
+      ['<img src="imagenes/2LLAVES.png" alt="2LLAVES">','2LLAVES'],
+      ['<img src="imagenes/ENCLAVAMIENTO.png" alt="ENCLAVAMIENTO">','ENCLAVAMIENTO'],
+      ['<img src="imagenes/RIESGO.png" alt="RIESGO">','RIESGO']
     ];
     const board=document.getElementById('board');
     const movesEl=document.getElementById('moves');
@@ -205,11 +238,65 @@
 
   /* ===== Trivia ===== */
   (function(){
-    const Q=[
-      {q:"Antes de dar mantenimiento a una máquina ¿qué debes hacer?", o:["Ponerte guantes","Colocar candado/etiqueta LOTO","Avisar al jefe"], a:1},
-      {q:"¿Qué mejora visibilidad frente a vehículos?", o:["Tapones auditivos","Chaleco reflectante","Arnés"], a:1},
-      {q:"Si hay líquido derramado en el piso, la acción correcta es...", o:["Ignorarlo","Delimitar y limpiar","Cubrirlo con cartón"], a:1}
-    ];
+    const Q = [
+  {q:"¿Qué se debe revisar en un paro de emergencia?", 
+   o:["Que cuente con señalización y funcione correctamente",
+      "Que esté cubierto con un capuchón",
+      "Que se use para cualquier tipo de parada",
+      "Que solo esté en oficinas"], a:0},
+
+  {q:"¿Cuál es la función de un paro de emergencia?", 
+   o:["Bloquear el acceso al operador",
+      "Detener la máquina únicamente en emergencias",
+      "Sustituir las guardas de seguridad",
+      "Apagar la luz de la planta"], a:1},
+
+  {q:"¿Qué características debe cumplir una guarda fija?", 
+   o:["Ser fácil de quitar con la mano",
+      "Retirarse solo con herramienta y cubrir al 100% partes móviles",
+      "No requiere señalización",
+      "Pueden estar flojas mientras protejan"], a:1},
+
+  {q:"¿Qué significa que una guarda móvil tenga 'interlock'?", 
+   o:["Que puede abrirse sin detener la máquina",
+      "Que solo el supervisor puede retirarla",
+      "Que la máquina se detiene automáticamente al abrirse",
+      "Que se bloquea con un candado"], a:2},
+
+  {q:"¿Qué dispositivos se consideran guardas con presencia?", 
+   o:["Botones de arranque",
+      "Cortinas de luz y tapetes de seguridad",
+      "Manuales de operación",
+      "Señalizaciones de piso"], a:1},
+
+  {q:"¿Cuál es el tamaño máximo de la abertura en una guarda tipo túnel o sobre?", 
+   o:["1 metro","80 cm","50 cm","No tiene límite"], a:2},
+
+  {q:"¿Qué debe tener una guarda para evitar atrapamientos?", 
+   o:["Pintura de color amarillo",
+      "Señalización de riesgo",
+      "Aperturas grandes",
+      "Estar hecha de madera"], a:1},
+
+  {q:"¿Qué se debe hacer con las lecciones aprendidas y SOPs?", 
+   o:["Guardarlas en bodega",
+      "Mantener acceso disponible para el personal",
+      "Compartirlas solo en auditorías",
+      "No son necesarias"], a:1},
+
+  {q:"¿Qué se revisa en la ejecución de tareas en máquinas?", 
+   o:["Que el trabajador pueda improvisar",
+      "Que se siga un procedimiento seguro de intervención",
+      "Que el operador trabaje sin guantes",
+      "Que no se usen paros de emergencia"], a:1},
+
+  {q:"¿Por qué es importante que las guardas estén fijas en su posición?", 
+   o:["Para que se vean más estéticas",
+      "Para asegurar la protección continua y evitar que se retiren fácilmente",
+      "Para poder moverlas rápido cuando se requiera",
+      "Para ahorrar en mantenimiento"], a:1}
+];
+
     let i=0,score=0;
     const box=document.getElementById('quizBox');
     function render(){
