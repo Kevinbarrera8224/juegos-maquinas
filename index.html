@@ -3,162 +3,287 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-  <title>Seguridad con Máquinas – Juegos con imágenes</title>
+  <title>Seguridad con Máquinas – Juegos</title>
   <style>
-    body {
-      margin: 0;
-      font-family: system-ui, Arial;
-      background: #0f172a;
-      color: #e5e7eb;
-    }
-    header {
-      background: #111827ee;
-      padding: 12px;
-      position: sticky;
-      top: 0;
-    }
-    h1 { margin: 0; font-size: 1.4rem; }
-    .tabs { display: flex; gap: 8px; margin-top: 8px; }
-    .tab {
-      border: none; padding: 10px 12px; border-radius: 12px;
-      background: #1f2937; color: #e5e7eb; cursor: pointer;
-    }
-    .tab[aria-selected="true"] { background: #22c55e; color: #081016; }
-    .grid { display: grid; gap: 14px; margin: 16px; }
-    .card {
-      background: #111827; border: 1px solid #333; border-radius: 16px;
-      padding: 16px; box-shadow: 0 6px 18px rgba(0,0,0,.4);
-    }
-    .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-width: 500px; }
-    .tile {
-      position: relative; aspect-ratio: 1/1;
-      border-radius: 14px; background: #0b1220; border: 1px solid #263044;
-      display: grid; place-items: center; cursor: pointer;
-      transform-style: preserve-3d; transition: transform .35s;
-    }
-    .tile.flip { transform: rotateY(180deg); }
-    .face { position: absolute; inset: 0; display: grid; place-items: center; backface-visibility: hidden; border-radius: 14px; }
-    .front { background: #0f1a30; }
-    .back { transform: rotateY(180deg); background: #1f2937; }
-    .back img { width: 60%; height: 60%; object-fit: contain; }
-    .pill { display: inline-block; padding: .2rem .5rem; border: 1px solid #444; border-radius: 999px; font-size: .8rem; }
-    .scene img { max-width: 100%; border-radius: 12px; border: 1px solid #444; }
+    body { margin:0; font-family: system-ui, Arial; background:#0f172a; color:#e5e7eb; }
+    header { background:#111827ee; padding:12px; position:sticky; top:0; z-index:10; }
+    h1 { margin:0; font-size:1.4rem; }
+    .tabs { display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+  .tab { border:none; padding:10px 12px; border-radius:12px; background:#1f2937; color:#e5e7eb; cursor:pointer; }
+    .tab[aria-selected="true"] { background:#22c55e; color:#081016; }
+    .grid { display:grid; gap:14px; margin:16px; }
+    .card { background:#111827; border:1px solid #333; border-radius:16px; padding:16px; box-shadow:0 6px 18px rgba(0,0,0,.4); }
+    .pill { display:inline-block; padding:.2rem .5rem; border:1px solid #444; border-radius:999px; font-size:.8rem; }
+    /* Memorama */
+    .board { display:grid; grid-template-columns: repeat(4,1fr); gap:10px; max-width:500px; }
+    .tile { position:relative; aspect-ratio:1/1; border-radius:14px; background:#0b1220; border:1px solid #263044; display:grid; place-items:center; cursor:pointer; transform-style:preserve-3d; transition:transform .35s; }
+    .tile.flip { transform:rotateY(180deg); }
+    .face { position:absolute; inset:0; display:grid; place-items:center; backface-visibility:hidden; border-radius:14px; }
+    .front { background:#0f1a30; }
+    .back { transform:rotateY(180deg); background:#1f2937; }
+    .back img { width:60%; height:60%; object-fit:contain; }
+    /* Imagen de riesgos */
+    .scene img { max-width:100%; border-radius:12px; border:1px solid #444; }
+    input[type="text"] { padding:10px; border-radius:10px; border:1px solid #374151; background:#0b1220; color:#e5e7eb; min-width:220px; }
+    button.primary { padding:10px 14px; border-radius:12px; border:0; background:#22c55e; color:#081016; font-weight:700; cursor:pointer; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Seguridad con Máquinas – Juegos</h1>
-    <div class="tabs">
-      <button class="tab" aria-selected="true" data-target="#memoria">🃏 Memorama</button>
-      <button class="tab" aria-selected="false" data-target="#riesgos">🚧 Detecta el riesgo</button>
+<header>
+  <h1>Seguridad con Máquinas – Juegos</h1>
+  <div class="tabs">
+    <button class="tab" aria-selected="true" data-target="#memoria">🃏 Memorama</button>
+    <button class="tab" aria-selected="false" data-target="#riesgos">🚧 Riesgos</button>
+    <button class="tab" aria-selected="false" data-target="#trivia">❓ Trivia</button>
+  </div>
+</header>
+
+<main class="grid">
+  <!-- Identidad del jugador -->
+  <section class="card" id="identidad">
+    <h2>👤 Datos del jugador</h2>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+      <label>
+        <div style="font-size:.9rem;opacity:.8">Nombre</div>
+        <input id="playerName" type="text" placeholder="Tu nombre" required>
+      </label>
+      <label>
+        <div style="font-size:.9rem;opacity:.8">Área</div>
+        <input id="playerArea" type="text" placeholder="Producción / Mantenimiento / ...">
+      </label>
+      <button id="saveIdentity" class="primary">Guardar</button>
+      <span id="idSaved" class="pill" style="display:none">✅ Guardado</span>
     </div>
-  </header>
+    <p class="pill" style="margin-top:8px;opacity:.8">Los datos se guardan en este dispositivo y se envían con tu puntaje.</p>
+  </section>
 
-  <main class="grid">
-    <!-- MEMORAMA -->
-    <section id="memoria" class="card" role="tabpanel">
-      <h2>🃏 Memorama de seguridad</h2>
-      <p>Empareja el ícono con su significado.</p>
-      <div class="board" id="board"></div>
-      <p><span class="pill">Movimientos: <span id="moves">0</span></span>
-         <span class="pill">Aciertos: <span id="matches">0</span>/7</span></p>
-      <button id="memReset">Reiniciar</button>
-      <p id="memMsg"></p>
-    </section>
+  <!-- MEMORAMA -->
+  <section id="memoria" class="card" role="tabpanel">
+    <h2>🃏 Memorama</h2>
+    <div class="board" id="board"></div>
+    <p><span class="pill">Movimientos: <span id="moves">0</span></span>
+       <span class="pill">Aciertos: <span id="matches">0</span>/7</span></p>
+    <button id="memReset" class="primary">Reiniciar</button>
+    <p id="memMsg"></p>
+  </section>
 
-    <!-- DETECTA EL RIESGO -->
-    <section id="riesgos" class="card" role="tabpanel" hidden>
-      <h2>🚧 Detecta el riesgo</h2>
-      <p>Toca las zonas peligrosas en la imagen.</p>
-      <div class="scene">
-        <img src="imagenes/escena_demo.png" alt="Escena demo"
-             usemap="#mapa-riesgos" width="800" height="450">
-        <map name="mapa-riesgos">
-          <area shape="rect" coords="600,250,660,320" alt="Trabajador sin chaleco"
-                data-control="Usar chaleco de alta visibilidad y cruzar por paso peatonal.">
-          <area shape="rect" coords="110,330,250,360" alt="Derrame sin señalizar"
-                data-control="Delimitar, absorber y corregir la fuga.">
-          <area shape="rect" coords="680,300,760,340" alt="Cruce peatonal"
-                data-control="Cruzar solo por el paso peatonal y hacer contacto visual con el operador.">
-        </map>
-      </div>
-      <div id="controlsBox" style="margin-top:10px"></div>
-      <p><span class="pill">Aciertos: <span id="riskHits">0</span>/3</span></p>
-    </section>
-  </main>
+  <!-- DETECTA EL RIESGO -->
+  <section id="riesgos" class="card" role="tabpanel" hidden>
+    <h2>🚧 Detecta el riesgo</h2>
+    <div class="scene">
+      <!-- Reemplaza la imagen por una tuya si quieres -->
+      <img src="imagenes/escena_demo.png" alt="Escena demo" usemap="#mapa-riesgos" width="800" height="450">
+      <map name="mapa-riesgos">
+        <area shape="rect" coords="600,250,660,320" alt="Trabajador sin chaleco"
+              data-control="Usar chaleco y cruzar por paso peatonal.">
+        <area shape="rect" coords="110,330,250,360" alt="Derrame sin señalizar"
+              data-control="Delimitar y corregir la fuga.">
+        <area shape="rect" coords="680,300,760,340" alt="Cruce peatonal"
+              data-control="Cruzar solo por paso peatonal.">
+      </map>
+    </div>
+    <div id="controlsBox"></div>
+    <p><span class="pill">Aciertos: <span id="riskHits">0</span>/3</span></p>
+  </section>
 
-  <script>
-    // ===== Tabs =====
-    const tabs=document.querySelectorAll('.tab');
-    const panels=[...document.querySelectorAll('[role="tabpanel"]')];
-    tabs.forEach(t=>t.onclick=()=>{
-      tabs.forEach(x=>x.setAttribute('aria-selected','false'));
-      t.setAttribute('aria-selected','true');
-      const sel=t.dataset.target;
-      panels.forEach(p=>p.hidden = ('#'+p.id)!==sel);
-    });
+  <!-- TRIVIA -->
+  <section id="trivia" class="card" role="tabpanel" hidden>
+    <h2>❓ Trivia de seguridad</h2>
+    <div id="quizBox"></div>
+  </section>
+</main>
 
-    // ===== Memorama =====
-    (function(){
-      const PAIRS = [
-        ['<img src="imagenes/casco.png" alt="Casco">','Casco de seguridad'],
-        ['<img src="imagenes/chaleco.png" alt="Chaleco">','Chaleco alta visibilidad'],
-        ['<img src="imagenes/candado.png" alt="Candado">','LOTO (bloqueo/etiquetado)'],
-        ['<img src="imagenes/gafas.png" alt="Gafas">','Protección ocular'],
-        ['<img src="imagenes/guantes.png" alt="Guantes">','Guantes de protección'],
-        ['<img src="imagenes/trafico.png" alt="Tráfico">','Zonas delimitadas / tráfico'],
-        ['<img src="imagenes/piso.png" alt="Piso irregular">','Piso irregular / señal de precaución']
-      ];
-      const board=document.getElementById('board');
-      const movesEl=document.getElementById('moves');
-      const matchesEl=document.getElementById('matches');
-      const msg=document.getElementById('memMsg');
-      let first=null, second=null, lock=false, moves=0, matches=0;
+<script>
+  /* ===== Tabs ===== */
+  const tabs=document.querySelectorAll('.tab');
+  const panels=[...document.querySelectorAll('[role="tabpanel"]')];
+  tabs.forEach(t=>t.onclick=()=>{
+    tabs.forEach(x=>x.setAttribute('aria-selected','false'));
+    t.setAttribute('aria-selected','true');
+    panels.forEach(p=>p.hidden=('#'+p.id)!==t.dataset.target);
+  });
 
-      function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-      function setup(){
-        board.innerHTML=''; moves=0; matches=0;
-        movesEl.textContent='0'; matchesEl.textContent='0'; msg.textContent='';
-        const data = shuffle([...PAIRS.map(p=>({t:'img',v:p[0],k:p[1]})), ...PAIRS.map(p=>({t:'txt',v:p[1],k:p[1]}))]);
-        data.forEach(it=>{
-          const t=document.createElement('div'); t.className='tile'; t.dataset.kind=it.t; t.dataset.key=it.k;
-          t.innerHTML='<div class="face front"></div><div class="face back">'+(it.t==='img'? it.v : '<small>'+it.v+'</small>')+'</div>';
-          t.onclick=()=>flip(t); board.appendChild(t);
-        });
-      }
-      function samePair(a,b){ return a.dataset.key===b.dataset.key && a.dataset.kind!==b.dataset.kind; }
-      function flip(t){
-        if(lock||t.classList.contains('flip')) return;
-        t.classList.add('flip');
-        if(!first){ first=t; return; }
-        second=t; lock=true; moves++; movesEl.textContent=moves;
-        if(samePair(first,second)){
-          matches++; matchesEl.textContent=matches;
-          lock=false; first=null; second=null;
-          if(matches===PAIRS.length) msg.textContent='🎉 ¡Completado!';
-        } else {
-          setTimeout(()=>{first.classList.remove('flip');second.classList.remove('flip');first=null;second=null;lock=false;},650);
-        }
-      }
-      document.getElementById('memReset').onclick=setup;
-      setup();
-    })();
+  /* ===== Identidad: nombre + área (localStorage) ===== */
+  function syncIdentityFromForm() {
+    const name = (document.getElementById('playerName').value || '').trim();
+    const area = (document.getElementById('playerArea').value || '').trim();
+    if (!name) { alert('Por favor escribe tu nombre'); return false; }
+    if (!area) { alert('Por favor escribe tu área'); return false; }
+    localStorage.setItem('player_name', name);
+    localStorage.setItem('player_area', area);
+    const tick = document.getElementById('idSaved');
+    if (tick) { tick.style.display = 'inline-block'; setTimeout(()=> tick.style.display='none', 1500); }
+    return true;
+  }
+  function populateIdentityForm() {
+    document.getElementById('playerName').value = localStorage.getItem('player_name') || '';
+    document.getElementById('playerArea').value = localStorage.getItem('player_area') || '';
+  }
+  function getPlayerInfo() {
+    return {
+      name: localStorage.getItem('player_name') || '',
+      area: localStorage.getItem('player_area') || ''
+    };
+  }
+  function ensureIdentity() {
+    const who = getPlayerInfo();
+    if (!who.name || !who.area) return syncIdentityFromForm();
+    return true;
+  }
+  document.getElementById('saveIdentity').addEventListener('click', (e)=>{ e.preventDefault(); syncIdentityFromForm(); });
+  document.addEventListener('DOMContentLoaded', populateIdentityForm);
 
-    // ===== Detecta el riesgo =====
-    (function(){
-      const box=document.getElementById('controlsBox');
-      const hitsEl=document.getElementById('riskHits');
-      let hits=0;
-      document.querySelectorAll('map[name="mapa-riesgos"] area').forEach(a=>{
-        a.addEventListener('click',(e)=>{
-          e.preventDefault();
-          if(a.dataset.done) return;
-          a.dataset.done='1';
-          hits++; hitsEl.textContent=hits;
-          const p=document.createElement('p'); p.textContent='✔ '+a.dataset.control; box.appendChild(p);
-        });
+  /* ===== Memorama ===== */
+  (function(){
+    const PAIRS=[
+      ['<img src="imagenes/casco.png" alt="Casco">','Casco'],
+      ['<img src="imagenes/chaleco.png" alt="Chaleco">','Chaleco'],
+      ['<img src="imagenes/candado.png" alt="Candado">','LOTO'],
+      ['<img src="imagenes/gafas.png" alt="Gafas">','Gafas'],
+      ['<img src="imagenes/guantes.png" alt="Guantes">','Guantes'],
+      ['<img src="imagenes/trafico.png" alt="Tráfico">','Tráfico'],
+      ['<img src="imagenes/piso.png" alt="Piso">','Piso irregular']
+    ];
+    const board=document.getElementById('board');
+    const movesEl=document.getElementById('moves');
+    const matchesEl=document.getElementById('matches');
+    const msg=document.getElementById('memMsg');
+    let first=null, second=null, lock=false, moves=0, matches=0;
+
+    function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+    function setup(){
+      board.innerHTML=''; moves=0; matches=0;
+      movesEl.textContent='0'; matchesEl.textContent='0'; msg.textContent='';
+      const data=shuffle([...PAIRS.map(p=>({t:'img',v:p[0],k:p[1]})),...PAIRS.map(p=>
+        ({t:'txt',v:p[1],k:p[1]}))]);
+      data.forEach(it=>{
+        const t=document.createElement('div'); t.className='tile'; t.dataset.kind=it.t; t.dataset.key=it.k;
+        t.innerHTML='<div class="face front"></div><div class="face back">'+(it.t==='img'?it.v:'<small>'+it.v+'</small>')+'</div>';
+        t.onclick=()=>flip(t); board.appendChild(t);
       });
-    })();
-  </script>
+    }
+    function samePair(a,b){return a.dataset.key===b.dataset.key && a.dataset.kind!==b.dataset.kind;}
+    function flip(t){
+      if(lock||t.classList.contains('flip')) return;
+      t.classList.add('flip');
+      if(!first){first=t;return;}
+      second=t; lock=true; moves++; movesEl.textContent=moves;
+      if(samePair(first,second)){
+        matches++; matchesEl.textContent=matches;
+        lock=false; first=null; second=null;
+        if(matches===PAIRS.length){
+          msg.textContent='🎉 ¡Completado!';
+          if (!ensureIdentity()) return;
+          window.__onMemoramaFinish(moves,PAIRS.length);
+        }
+      } else {
+        setTimeout(()=>{first.classList.remove('flip');second.classList.remove('flip');first=null;second=null;lock=false;},650);
+      }
+    }
+    document.getElementById('memReset').onclick=setup;
+    setup();
+  })();
+
+  /* ===== Detecta el riesgo ===== */
+  (function(){
+    const box=document.getElementById('controlsBox');
+    const hitsEl=document.getElementById('riskHits');
+    let hits=0;
+    document.querySelectorAll('map[name="mapa-riesgos"] area').forEach(a=>{
+      a.addEventListener('click',(e)=>{
+        e.preventDefault();
+        if(a.dataset.done) return;
+        a.dataset.done='1'; hits++; hitsEl.textContent=hits;
+        const p=document.createElement('p'); p.textContent='✔ '+a.dataset.control; box.appendChild(p);
+        if(hits>=3){
+          if (!ensureIdentity()) return;
+          window.__onRiesgosFinish(hits,3);
+        }
+      });
+    });
+  })();
+
+  /* ===== Trivia ===== */
+  (function(){
+    const Q=[
+      {q:"Antes de dar mantenimiento a una máquina ¿qué debes hacer?", o:["Ponerte guantes","Colocar candado/etiqueta LOTO","Avisar al jefe"], a:1},
+      {q:"¿Qué mejora visibilidad frente a vehículos?", o:["Tapones auditivos","Chaleco reflectante","Arnés"], a:1},
+      {q:"Si hay líquido derramado en el piso, la acción correcta es...", o:["Ignorarlo","Delimitar y limpiar","Cubrirlo con cartón"], a:1}
+    ];
+    let i=0,score=0;
+    const box=document.getElementById('quizBox');
+    function render(){
+      if(i>=Q.length){
+        box.innerHTML=`<strong>🏁 ¡Fin!</strong> Aciertos: ${score}/${Q.length}`;
+        if (!ensureIdentity()) return;
+        window.__onTriviaFinish(score,Q.length);
+        return;
+      }
+      const q=Q[i]; box.innerHTML=`<p>${q.q}</p>`;
+      q.o.forEach((opt,idx)=>{
+        const b=document.createElement('button'); b.className="primary";
+        b.textContent=opt; b.onclick=()=>{ if(idx===q.a) score++; i++; render(); };
+        box.appendChild(b);
+      });
+    }
+    render();
+  })();
+</script>
+
+<!-- ===== MARCADOR ONLINE (Google Sheets) ===== -->
+<script>
+  // Pega aquí el URL /exec de tu App Web de Apps Script:
+  const SCORE_ENDPOINT = "https://script.google.com/macros/s/AKfycbwmEVXdDwRsmUJiy_CnLMZIDuQpeq7PkCv1k1ygmHG89QqqmFiKwwksdS2u73oMbmu4/exec";
+
+  function toast(msg){const t=document.createElement("div");t.textContent=msg;
+    Object.assign(t.style,{position:"fixed",left:"50%",bottom:"16px",transform:"translateX(-50%)",
+    background:"#111827",color:"#e5e7eb",padding:"10px 14px",borderRadius:"10px",border:"1px solid #374151",zIndex:9999});
+    document.body.appendChild(t);setTimeout(()=>t.remove(),2500);}
+  function getDeviceId(){let id=localStorage.getItem("device_id");if(!id){id=(crypto.randomUUID?.()||(Date.now()+"-"+Math.random()));localStorage.setItem("device_id",id);}return id;}
+  function getPlayerInfo(){return{ name:localStorage.getItem("player_name")||"", area:localStorage.getItem("player_area")||"" };}
+
+  async function submitScore({ game, score, extra={} }){
+    if(!SCORE_ENDPOINT || !SCORE_ENDPOINT.includes("/exec")){ toast("Configura SCORE_ENDPOINT"); return; }
+    const who=getPlayerInfo();
+    const payload={ name:who.name||"Jugador", area:who.area||"Otra", game, score:Number(score)||0, device_id:getDeviceId(), ...extra };
+    try{
+      await fetch(SCORE_ENDPOINT,{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload), mode:"no-cors" });
+      toast("✅ Puntaje enviado");
+      console.log("Score enviado:", payload);
+    }catch(e){ console.error(e); toast("⚠️ No se pudo enviar el puntaje"); }
+  }
+
+  // Ganchos que se llaman al terminar cada juego
+  window.__onTriviaFinish=(score,total)=>submitScore({game:"trivia",score,extra:{total}});
+  window.__onMemoramaFinish=(moves,pairs)=>{const pts=Math.max(1,(pairs*50)-moves);submitScore({game:"memorama",score:pts,extra:{moves,pairs}});}
+  window.__onRiesgosFinish=(hits,needed)=>{const pts=hits>=needed?100:Math.round(100*(hits/needed));submitScore({game:"riesgos",score:pts,extra:{hits,needed}});}
+</script>
+
+<!-- (Opcional) Mini panel de diagnóstico: descomenta si lo necesitas
+<script>
+(function debugScores(){
+  const box=document.createElement('div');
+  Object.assign(box.style,{position:'fixed',left:'10px',bottom:'10px',padding:'10px 12px',background:'#0b1220',color:'#e5e7eb',border:'1px solid #374151',borderRadius:'10px',fontSize:'12px',zIndex:99999,maxWidth:'300px'});
+  box.innerHTML = `
+    <div style="font-weight:700;margin-bottom:6px">Debug marcador</div>
+    <div>Endpoint: <code style="word-break:break-all">${(typeof SCORE_ENDPOINT!=='undefined'?SCORE_ENDPOINT:'(no definido)')}</code></div>
+    <div id="dbgIdent" style="margin:6px 0"></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button id="dbgSet" style="padding:6px 10px;border-radius:8px;border:1px solid #374151;background:#1f2937;color:#e5e7eb">👤 Cambiar nombre/área</button>
+      <button id="dbgSend" style="padding:6px 10px;border-radius:8px;border:1px solid #374151;background:#22c55e;color:#081016;font-weight:700">🚀 Enviar prueba</button>
+    </div>
+    <div id="dbgMsg" style="margin-top:6px;opacity:.9"></div>`;
+  document.body.appendChild(box);
+  function getDeviceId(){ let id=localStorage.getItem('device_id'); if(!id){ id=(crypto.randomUUID?.()||(Date.now()+'-'+Math.random())); localStorage.setItem('device_id',id); } return id; }
+  function renderIdent(){ const n=localStorage.getItem('player_name')||'(sin nombre)'; const a=localStorage.getItem('player_area')||'(sin área)'; document.getElementById('dbgIdent').textContent=`👤 ${n} — 🏷️ ${a}`; }
+  document.getElementById('dbgSet').onclick=()=>{ localStorage.removeItem('player_name'); localStorage.removeItem('player_area'); alert('Vuelve a llenar el formulario arriba.'); renderIdent(); };
+  document.getElementById('dbgSend').onclick=async()=>{ const payload={ name:localStorage.getItem('player_name')||'Jugador', area:localStorage.getItem('player_area')||'Otra', game:'test', score:1, device_id:getDeviceId(), debug:true };
+    document.getElementById('dbgMsg').textContent='Enviando…';
+    try{ await fetch(SCORE_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),mode:'no-cors'}); document.getElementById('dbgMsg').textContent='✅ Enviado. Revisa tu Google Sheet.'; }catch(e){ document.getElementById('dbgMsg').textContent='❌ Error al enviar'; console.error(e); }
+  };
+  renderIdent();
+})();
+</script>
+-->
 </body>
 </html>
